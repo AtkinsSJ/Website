@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Sam Atkins</title>
+    <link rel="stylesheet" href="normalize.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+</head>
+<body>
+    <header>
+        <h1>Sam Atkins</h1>
+        <p>Computery stuff</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>Hi there!</h2>
+            <p>
+                I'm a software developer from the UK. I started writing code at a young age, programming small games,
+                and since then I've dabbled in a lot of technologies. C++, PHP, Java, Kotlin on Android, some front-end
+                web dev, occasionally Python or C#, and once even some Perl. I'm happy to give anything a try.
+            </p>
+            <p>
+                Most recently, I've been working in C++ on the
+                <a href="https://serenityos.org" rel="noopener noreferrer">Serenity</a> operating system project, where
+                among other things I finished up and integrated a spec-compliant CSS parser which I continue to work on.
+            </p>
+        </section>
+
+        <section>
+            <h2>Recent GitHub Activity</h2>
+            <ol id="github-activity"></ol>
+        </section>
+    </main>
+
+    <footer>
+        <a href="mailto:atkinssj@gmail.com" target="_blank" rel="noopener noreferrer">Email</a> -
+        <a href="https://github.com/atkinssj" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </footer>
+
+    <div id="gears">
+        <div class="gear" style="width: 1000px; height: 1000px; top: -500px; left: -500px; animation-duration: 30s"></div>
+
+        <div class="gear" style="width: 125px; height: 125px; bottom: 255px; right: 10px; animation-duration: 5s"></div>
+        <div class="gear reverse" style="width: 250px; height: 250px; bottom: 18px; right: -125px;"></div>
+        <div class="gear" style="width: 500px; height: 500px; bottom: -250px; right: 101px; animation-duration: 20s"></div>
+    </div>
+
+    <script>
+        console.log("%c Hi there! :^)", "font-size: 5em");
+        window.addEventListener('load', function() {
+            const GITHUB_URL = "https://api.github.com/users/atkinssj/events/public?per_page=50";
+            const githubActivityList = document.getElementById("github-activity");
+
+            function appendEvent(date, repo, action, event_url, message) {
+                let li = document.createElement("li");
+
+                let heading = document.createElement("h3");
+                heading.appendChild(document.createTextNode(`${repo.name} → `));
+                let link = document.createElement("a");
+                link.href = event_url;
+                link.text = action;
+                heading.appendChild(link);
+                li.appendChild(heading);
+
+                let time = document.createElement("time");
+                time.dateTime = date;
+                time.innerText = new Date(date).toLocaleDateString();
+                li.appendChild(time);
+
+                if (message) {
+                    let contents = document.createElement("p");
+                    contents.innerText = message;
+                    li.appendChild(contents);
+                }
+
+                githubActivityList.appendChild(li);
+            }
+
+            fetch(GITHUB_URL, { mode: "cors" })
+                .then(function(response) {
+                    if (!response.ok)
+                        throw new Error("HTTP error " + response.status);
+                    return response.json();
+                })
+                .then(function(json){
+                    for (let event of json) {
+                        switch (event.type) {
+                            case "IssuesEvent": {
+                                const issue = event.payload.issue;
+                                if (event.payload.action === "opened") {
+                                    appendEvent(event.created_at, event.repo, "Opened an issue", issue.html_url, issue.title);
+                                }
+                            } break;
+
+                            case "PullRequestEvent": {
+                                const pr = event.payload.pull_request;
+                                if (event.payload.action === "opened") {
+                                    appendEvent(event.created_at, event.repo, "Created a pull request", pr.html_url, pr.title);
+                                }
+                            } break;
+
+                            case "PullRequestReviewEvent": {
+                                const pr = event.payload.pull_request;
+                                const review = event.payload.review;
+                                if (event.payload.action === "created" && pr.user.login.toLowerCase() !== "atkinssj") {
+                                    appendEvent(event.created_at, event.repo, "Left a review", review.html_url, review.body);
+                                }
+                            } break;
+                        }
+                    }
+                })
+                .catch(function(error) {
+                    let error_p = document.createElement("p");
+                    error_p.innerText = "Unable to load GitHub activity: " + error.message;
+                    document.body.insertBefore(error_p, githubActivityList);
+                });
+        });
+    </script>
+</body>
+</html>
