@@ -65,7 +65,36 @@
             const GITHUB_URL = "https://api.github.com/users/atkinssj/events/public?per_page=50";
             const githubActivityList = document.getElementById("github-activity");
 
-            function appendEvent(date, repo, action, event_url, message) {
+            function formatRelativeDate(date) {
+                const deltaSeconds = (new Date().valueOf() - date.valueOf()) / 1000;
+
+                if (deltaSeconds < 20)
+                    return 'just now';
+                if (deltaSeconds < 60)
+                    return `${Math.floor(deltaSeconds)} seconds ago`;
+
+                const deltaMinutes = deltaSeconds / 60;
+                if (Math.floor(deltaMinutes) < 2)
+                    return 'a minute ago';
+                if (deltaMinutes < 60)
+                    return `${Math.floor(deltaMinutes)} minutes ago`;
+
+                const deltaHours = deltaMinutes / 60;
+                if (Math.floor(deltaHours) < 2)
+                    return 'an hour ago';
+                if (deltaHours < 24)
+                    return `${Math.floor(deltaHours)} hours ago`;
+
+                const deltaDays = deltaHours / 24;
+                if (Math.floor(deltaDays) < 2)
+                    return 'yesterday';
+                if (deltaDays < 7)
+                    return `${Math.floor(deltaDays)} days ago`;
+
+                return date.toLocaleDateString();
+            }
+
+            function appendEvent(dateString, repo, action, event_url, message) {
                 let li = document.createElement("li");
 
                 let heading = document.createElement("h3");
@@ -77,8 +106,10 @@
                 li.appendChild(heading);
 
                 let time = document.createElement("time");
-                time.dateTime = date;
-                time.innerText = new Date(date).toLocaleDateString();
+                const date = new Date(dateString);
+                time.dateTime = dateString;
+                time.innerText = formatRelativeDate(date);
+                time.title = date.toLocaleString();
                 li.appendChild(time);
 
                 if (message) {
