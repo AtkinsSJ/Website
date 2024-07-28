@@ -116,7 +116,10 @@
                             case "PullRequestReviewEvent": {
                                 const pr = event.payload.pull_request;
                                 const review = event.payload.review;
-                                if (event.payload.action === "created" && pr.user.login.toLowerCase() !== "atkinssj") {
+                                if (event.payload.action === "created"
+                                    && pr.user.login.toLowerCase() !== "atkinssj"
+                                    && review.body
+                                ) {
                                     appendEvent(event.created_at, event.repo, "Left a review", review.html_url, review.body);
                                 }
                             } break;
