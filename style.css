@@ -8,6 +8,10 @@
     --gear-opacity: 30%;
 }
 
+/*
+ * Disabling this for now, because browsers interpret "I don't care about the color scheme" as "light",
+ * and dark looks better.
+
 @media (prefers-color-scheme: light) {
     :root {
         --accent-color: #33d;
@@ -18,6 +22,7 @@
         --gear-opacity: 10%;
     }
 }
+*/
 
 body {
     margin: 0 auto;
